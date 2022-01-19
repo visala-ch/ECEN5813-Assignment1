@@ -14,6 +14,9 @@ https://cboard.cprogramming.com/cplusplus-programming/43848-signed-int-binary.ht
 For getting last n bits of an integer (grab_three_bits):
 https://stackoverflow.com/questions/8011700/how-do-i-extract-specific-n-bits-of-a-32-bit-unsigned-integer-in-c/8012148
 
+Logic for twiggle_bit:
+Class examples from Howdy Pierce's lectures
+
 *******************************************************************************/
 #include "hw1.h"
 
@@ -170,18 +173,25 @@ int uint_to_hexstr(char *str, size_t size, uint32_t num, uint8_t nbits)
     int index = 0, hexVal = 0;
 
     // Checking for invalid nbits
-    if ((nbits & (nbits - 1)) || (nbits > 32) || ((nbits & (nbits - 1)) != 0))
+    if ((nbits < 0) || (nbits > 32) || ((nbits & (nbits - 1)) != 0))
     {
         str[0] = '\0';
         return -1;
     }
+    //num<0
+    if (num < 0)
+    {
+        str[0] = '\0';
+        return -1;
+    }
+    //num==0
     if (num == 0)
     {
         str[index] = '0';
         hexLength++;
         index++;
     }
-
+    //converting to hex for Any positive num
     while (num != 0)
     {
         hexVal = num & 0xF;
@@ -196,6 +206,7 @@ int uint_to_hexstr(char *str, size_t size, uint32_t num, uint8_t nbits)
 
         if (index + 2 > size)
         {
+            str[0] = '\0';
             return -1;
         }
         num = num >> 4;
@@ -204,8 +215,10 @@ int uint_to_hexstr(char *str, size_t size, uint32_t num, uint8_t nbits)
     if ((nbits == 4))
     {
         if (hexLength != 1)
+        {
             str[0] = '\0';
-        return -1;
+            return -1;
+        }
     }
 
     if (nbits == 8)
@@ -256,6 +269,8 @@ int uint_to_hexstr(char *str, size_t size, uint32_t num, uint8_t nbits)
         }
     }
 
+    printf("str %s\n", str);
+
     str[index] = 'x';
     str[index + 1] = '0';
     str[index + 2] = '\0';
@@ -284,9 +299,10 @@ int uint_to_hexstr(char *str, size_t size, uint32_t num, uint8_t nbits)
 }
 
 // Function 4:
-// Changes a single bit of the input value, without changing the other bits.
-// Upon invocation, bit is in the range 0 to 31, inclusive. Returns 0xFFFFFFFF
-// in the case of an error.
+// Changes a single bit of the input value, without changing the other bits
+//and returns the resultant value
+// Upon invocation, bit is in the range 0 to 31, inclusive, operation is one of SET, CLEAR or TOGGLE
+// Returns 0xFFFFFFFF in the case of an error.
 uint32_t twiggle_bit(uint32_t input, int bit, operation_t operation)
 {
     char hexArray[32] = "";
@@ -303,12 +319,6 @@ uint32_t twiggle_bit(uint32_t input, int bit, operation_t operation)
     if (input > INT_MAX)
     {
         return 0xFFFFFFFF;
-    }
-
-    // Checking if input is bin, int or hex
-    if (hexArray[1] == 'x')
-    {
-        uint_to_hexstr(hexArray, 32, input, 32);
     }
 
     // Twiggle bits based on the operation type
@@ -351,13 +361,16 @@ uint32_t grab_three_bits(uint32_t input, int start_bit)
         return -1;
     }
 
-    // Checking for a negative input:
+    // Checking for a negative input
     // Checking with INT_MAX because input is of type uint,
     // which automatically upgrades any -ve value to max integer value
     if (input > INT_MAX)
     {
         return 0xFFFFFFFF;
     }
+    //input shifted down by start_bit and is set such that only the first
+    //3 bits from LSB are set and input value is equivalent to the value
+    //of those three bits
     input = input >> start_bit;
     input = input & 0x07; //(1<<3)-1 (This logic is given credit above.)
     return input;
@@ -388,11 +401,20 @@ char *hexdump(char *str, size_t size, const void *loc, size_t nbytes)
 
 int main()
 {
-    test_uint_to_binstr();
+    int binOut = test_uint_to_binstr();
+    printf("test Result: %d\n", binOut);
 
-    // test_int_to_binstr();
+    int binStrOut = test_int_to_binstr();
+    printf("test Result: %d\n", binStrOut);
 
-    // test_uint_to_hexstr();
+    // int hexOut = test_uint_to_hexstr();
+    // printf("test Result: %d\n", hexOut);
+
+    // int twiggleOut = test_twiggle_bit();
+    // printf("test Result: %d\n", twiggleOut);
+
+    // int grabOut = test_grab_three_bits();
+    // printf("test Result: %d\n", grabOut);
 
     return 0;
 }
